@@ -1,7 +1,16 @@
+<!--
+when "server_is_buisy" wait 2 secondson the client side , mean while,show the user some nice animation
 
+take the server url from server_url.txt on the htmls server 
+
+// לשנות כך שמשיכת מוצרים תעשה רק בתגובה לפעולה של המשתמש, ככה זה מכביד על השרת לשווא
+---------
+app optional url parameter "coupon-code" to automatically fill the coupon code
+---
 add "update coupon" button + server side functionality
 
 --
+להוסיף גם "ברצוני לקבל מידע על מוצרים ומבצעים"
 
 לכתוב קוד בצד השרת שמקבל את ההזמנה ומכניס לבסיס הנתונים 
 
@@ -9,6 +18,32 @@ add "update coupon" button + server side functionality
 ללמוד את ה ממשק  של מקס ולהתחבר אליהם
 ------
 ----
+
+result.result can be  "ok" or "error" or "server_is_buisy" - handle all these cases in the code
+
+
+
+instructions for AI:
+before you write any code or do any other task, please go over my instructions and the code and ask me about anything that is missing or is not clear or my mistake or is ambigues etc...
+
+implement only the functions ???() and ???()
+
+write the  minimal amount of code required to do the tasks
+put the block start { in a new line
+if/else should also be in new line
+never delete my comments (i need it for orientation when going over your code, i will delete tham later)
+
+preffered error handling example (only where applicable):
+if(custRowIndex == -1)
+  return {code:0, text:"customer was not found"}; // code: 1 - success, 0 - error
+
+use existing helper functions and suggest new helper functions that you think should be used, ask me before implementing
+
+attached is the server side code
+attached is the db structure
+attached is the configuration first column
+-->
+
 
 
 <!DOCTYPE html>
@@ -32,7 +67,7 @@ add "update coupon" button + server side functionality
 	 * from the copyright holder.
 	 */
  
-	const g_server_url = "https://script.google.com/macros/s/AKfycbwJHNYUgBC2XiPeNLv7wY3vKNn89VUPNlfJMprKkFtiECOer_CDGO30dgSYqIxee6Np/exec";
+	var g_server_url = "";
 	
 	var g_products_data_from_server; 
 	var g_pickup_points_data_from_server;
@@ -77,7 +112,7 @@ add "update coupon" button + server side functionality
 
 		const result = await response.json();
 
-		if (result.status !== "success")
+		if (result.result !== "ok")
 		{
 		  console.error("update_inventory() failed:", result.message);
 		  return;
@@ -235,9 +270,32 @@ add "update coupon" button + server side functionality
 	}
 
 
+	function getServerUrl() 
+	{
+		const xhr = new XMLHttpRequest();
+		xhr.open("GET", "https://beensman.github.io/rnt/server_url.txt", false); // false = synchronous
+		xhr.send();
+
+		if (xhr.status === 200) 
+		{
+			return xhr.responseText.trim();
+		} 
+		else 
+		{
+			return "";
+		}
+	}
+
+
 	async function on_page_load()
 	{
 		showOverlay("טוען נתונים מהשרת ...");
+		g_server_url = getServerUrl();
+		if(getServerUrl == "")
+		{
+			alert("לא מצליח להתחבר אל שרת הקבצים, יש לרענן את העמוד!");
+			return;
+		}
 		await show_products();
 		await show_pickup_points();
 		await get_delivery_date_text();
@@ -263,9 +321,9 @@ add "update coupon" button + server side functionality
 
 		const result = await response.json();
 
-		if (result.status !== "success")
+		if (result.result !== "ok")
 		{
-		  console.error("get_delivery_date_text() failed:", result.message);
+		  console.error("get_delivery_date_text() failed:", result.text);
 		  return;
 		}
 
