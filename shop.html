@@ -10,7 +10,6 @@ WHAT SHOULD YOU DO?
 - add hebrew text for google search engine "ברוכים הבאים לחנות של רומיה ותמר"
 - add the text beneth the welcome text "מוצרים שלא קיימים במלאי לא מוצגים כאן, לצפיה בכל המוצרים שלנו לחצו כאן" make this text a link to https://www.rumyah-and-tamar.com/
 
-
 give me the whole file with (only) the requested changes
 do only as i requested. nothing more. 
 
@@ -72,6 +71,7 @@ why is the page loading so slow?
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="ברוכים הבאים לחנות של רומיה ותמר">
 	<title>rumyah-and-tamar.com</title>
 
 	<style>
@@ -94,6 +94,35 @@ why is the page loading so slow?
 		{
 			max-width: 500px;
 			margin: auto;
+		}
+
+		/* LOGO & WELCOME TEXT */
+
+		.logo
+		{
+			display: block;
+			max-width: 180px;
+			margin: 0 auto 15px auto;
+		}
+
+		.welcome-text
+		{
+			text-align: center;
+			font-size: 16px;
+			font-weight: bold;
+			margin-bottom: 8px;
+		}
+
+		.welcome-link
+		{
+			text-align: center;
+			font-size: 13px;
+			margin-bottom: 15px;
+		}
+
+		.welcome-link a
+		{
+			color: #1d7c45;
 		}
 
 		/* LOADING OVERLAY */
@@ -610,11 +639,31 @@ why is the page loading so slow?
 			return "";
 		}
 	}
+
+
+	function fill_coupon_code_from_url()
+	{
+		try
+		{
+			const url_params = new URLSearchParams(window.location.search);
+			const coupon_code_from_url = url_params.get("coupon-code");
+			if(coupon_code_from_url)
+			{
+				document.getElementById('g_coupon_code_input').value = coupon_code_from_url;
+			}
+		}
+		catch(err)
+		{
+			console.log("ERROR: fill_coupon_code_from_url() catch error:" + err.toString());
+		}
+	}
 	
 
 	async function on_page_load()
 	{
 		showOverlay("טוען נתונים מהשרת ...");
+		
+		fill_coupon_code_from_url();
 		
 		g_server_url = getServerUrl();
 		if(g_server_url == "")
@@ -897,6 +946,13 @@ why is the page loading so slow?
 	<!-- LOADING OVERLAY -->
 	<div id="g_loading_overlay">
 		<div class="loading-box"><span id="g_overlay_text">טקסט להחלפה</span></div>
+	</div>
+
+	<!-- LOGO & WELCOME TEXT -->
+	<div class="container">
+		<img src="https://i.ibb.co/S4wS7h6f/logo-small.png" alt="לוגו רומיה ותמר" class="logo">
+		<div class="welcome-text">ברוכים הבאים לחנות של רומיה ותמר</div>
+		<div class="welcome-link"><a href="https://www.rumyah-and-tamar.com/">מוצרים שלא קיימים במלאי לא מוצגים כאן, לצפיה בכל המוצרים שלנו לחצו כאן</a></div>
 	</div>
 
 	<div class="container" id="g_products_div">
