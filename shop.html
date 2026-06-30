@@ -5,10 +5,8 @@ instructions for AI:
 before you write any code or do any other task, please go over my instructions and the code and ask me about anything that is missing or is not clear or my mistake or is ambigues etc...
 
 WHAT SHOULD YOU DO?
--add optional url parameter "coupon-code" to automatically fill the coupon code
-- add logo at the top of the page  https://i.ibb.co/S4wS7h6f/logo-small.png
-- add hebrew text for google search engine "ברוכים הבאים לחנות של רומיה ותמר"
-- add the text beneth the welcome text "מוצרים שלא קיימים במלאי לא מוצגים כאן, לצפיה בכל המוצרים שלנו לחצו כאן" make this text a link to https://www.rumyah-and-tamar.com/
+
+
 
 give me the whole file with (only) the requested changes
 do only as i requested. nothing more. 
@@ -101,14 +99,15 @@ why is the page loading so slow?
 		.logo
 		{
 			display: block;
-			max-width: 180px;
+			/*   max-width: 180px; */
+			width: 100%;
 			margin: 0 auto 15px auto;
 		}
 
 		.welcome-text
 		{
 			text-align: center;
-			font-size: 16px;
+			font-size: 32px;
 			font-weight: bold;
 			margin-bottom: 8px;
 		}
@@ -116,7 +115,7 @@ why is the page loading so slow?
 		.welcome-link
 		{
 			text-align: center;
-			font-size: 13px;
+			font-size: 16px;
 			margin-bottom: 15px;
 		}
 
@@ -950,7 +949,7 @@ why is the page loading so slow?
 
 	<!-- LOGO & WELCOME TEXT -->
 	<div class="container">
-		<img src="https://i.ibb.co/S4wS7h6f/logo-small.png" alt="לוגו רומיה ותמר" class="logo">
+		<img src="https://i.ibb.co/S4wS7h6f/logo-small.png" alt="לוגו רומיה ותמר" class="logo"> <!-- https://i.ibb.co/2L4HRRz/logo-medium.png -->
 		<div class="welcome-text">ברוכים הבאים לחנות של רומיה ותמר</div>
 		<div class="welcome-link"><a href="https://www.rumyah-and-tamar.com/">מוצרים שלא קיימים במלאי לא מוצגים כאן, לצפיה בכל המוצרים שלנו לחצו כאן</a></div>
 	</div>
