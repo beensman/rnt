@@ -28,22 +28,33 @@
 	<script>
 
 	var g_did_i_finish_reporting_to_server = 0;
-	
-	async function getServerUrl()
+
+	function getServerUrl()
 	{
 		try
 		{
-			const cacheBuster = new Date().getTime(); // unique value each call to prevent from getting a chached version
-			const response = await fetch("https://beensman.github.io/rnt/server_url.txt?v=" + cacheBuster);
-			const text = await response.text();
-			return text.trim();
+			const cacheBuster = new Date().getTime(); // unique value each call to prevent from getting a cached version
+			const xhr = new XMLHttpRequest();
+			xhr.open("GET", "https://beensman.github.io/rnt/server_url.txt?v=" + cacheBuster, false); // false = synchronous
+			xhr.send(null);
+
+			if (xhr.status >= 200 && xhr.status < 300)
+			{
+				return xhr.responseText.trim();
+			}
+			else
+			{
+				console.log("ERROR: getServerUrl() failed: HTTP status " + xhr.status);
+				return undefined;
+			}
 		}
-		catch (error) 
+		catch (error)
 		{
 			console.log("ERROR: getServerUrl() failed: catch " + error);
+			return undefined;
 		}
 	}
-
+	
 
 	function getQueryParams()
 	{
@@ -107,7 +118,7 @@
 		}
 		catch(error)
 		{
-			console.log("ERROR: getQueryParams() failed: catch " + error");
+			console.log("ERROR: notifyServer() failed: catch " + error");
 		}		
 	}
 		
@@ -127,9 +138,8 @@
 	{
 		try
 		{
-			alert("i love  rock and roll");
 			const params = getQueryParams();
-			const serverUrl = await getServerUrl();
+			const serverUrl = getServerUrl();
 			const result = await notifyServer(serverUrl, params);
 
 			const msgEl = document.getElementById("status-message");
