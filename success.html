@@ -33,6 +33,8 @@
 	{
 		try
 		{
+			console.log("getServerUrl()");
+
 			const cacheBuster = new Date().getTime(); // unique value each call to prevent from getting a cached version
 			const xhr = new XMLHttpRequest();
 			xhr.open("GET", "https://beensman.github.io/rnt/server_url.txt?v=" + cacheBuster, false); // false = synchronous
@@ -40,6 +42,7 @@
 
 			if (xhr.status >= 200 && xhr.status < 300)
 			{
+				console.log("URL: " + xhr.responseText.trim());
 				return xhr.responseText.trim();
 			}
 			else
@@ -60,6 +63,8 @@
 	{
 		try
 		{
+			console.log("getQueryParams()");
+
 			const params = {};
 			const searchString = window.location.search.substring(1);
 			if (!searchString) return params;
@@ -85,6 +90,8 @@
 	{
 		try
 		{
+			console.log("notifyServer()");
+
 			while (true)
 			{
 				try
@@ -138,6 +145,8 @@
 	{
 		try
 		{
+			console.log("on_page_load()");
+			
 			const params = getQueryParams();
 			const serverUrl = getServerUrl();
 			const result = await notifyServer(serverUrl, params);
