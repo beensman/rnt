@@ -48,13 +48,13 @@
 			else
 			{
 				console.log("ERROR: getServerUrl() failed: HTTP status " + xhr.status);
-				return undefined;
+				return "";
 			}
 		}
 		catch (error)
 		{
 			console.log("ERROR: getServerUrl() failed: catch " + error);
-			return undefined;
+			return "";
 		}
 	}
 	
@@ -82,6 +82,7 @@
 		catch(error)
 		{
 			console.log("ERROR: getQueryParams() failed: catch " + error);
+			return "";
 		}		
 	}
 
@@ -92,7 +93,7 @@
 		{
 			console.log("notifyServer()");
 
-			while (true)
+			for(let i=0; i<10;  i++)
 			{
 				try
 				{
@@ -111,7 +112,7 @@
 
 					if (data.result === "server_is_buisy")
 					{
-						await new Promise(resolve => setTimeout(resolve, 1500));
+						await new Promise(resolve => setTimeout(resolve, 1500)); // sleep
 						continue;
 					}
 
@@ -119,8 +120,13 @@
 				}
 				catch (err)
 				{
-					await new Promise(resolve => setTimeout(resolve, 1500));
+					await new Promise(resolve => setTimeout(resolve, 1500)); // sleep
 				}
+			}
+			
+			if(i == 10)
+			{
+				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
 			}
 		}
 		catch(error)
@@ -148,7 +154,24 @@
 			console.log("on_page_load()");
 			
 			const params = getQueryParams();
-			const serverUrl = getServerUrl();
+			if(params == "")
+			{
+				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
+			}
+			
+			var serverUrl = getServerUrl();
+			
+			for(let i=0; i<10 && serverUrl == ""; i++)
+			{
+				serverUrl = getServerUrl();
+				await new Promise(resolve => setTimeout(resolve, 2000)); // sleep
+			}
+			
+			if(i == 10)
+			{
+				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
+			}
+			
 			const result = await notifyServer(serverUrl, params);
 
 			const msgEl = document.getElementById("status-message");
