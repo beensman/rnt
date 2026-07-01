@@ -5,8 +5,7 @@ instructions for AI:
 before you write any code or do any other task, please go over my instructions and the code and ask me about anything that is missing or is not clear or my mistake or is ambigues etc...
 
 WHAT SHOULD YOU DO?
-
-
+nothing here
 
 give me the whole file with (only) the requested changes
 do only as i requested. nothing more. 
@@ -404,7 +403,8 @@ why is the page loading so slow?
 		coupon_code: null,
 		verification_code: null,
 		terms_accepted: null,
-		sms_reminder_opt_in: null
+		sms_reminder_opt_in: null,
+		marketing_opt_in: null
 	};
 	
 
@@ -662,7 +662,6 @@ why is the page loading so slow?
 	{
 		showOverlay("טוען נתונים מהשרת ...");
 		
-		fill_coupon_code_from_url();
 		
 		g_server_url = getServerUrl();
 		if(g_server_url == "")
@@ -671,12 +670,16 @@ why is the page loading so slow?
 			return;
 		}
 		
-		console.log(g_server_url); // debug
+		console.log(g_server_url);
 		
-		await show_products();
-		await show_pickup_points();
-		await get_delivery_date_text();
+		await Promise.all([show_products(), show_pickup_points(), get_delivery_date_text()]);
+		
+		//await show_products();
+		//await show_pickup_points();
+		//await get_delivery_date_text();
 		hideOverlay();
+		
+		fill_coupon_code_from_url();
 		
 		//update_inventory();
 		
@@ -689,6 +692,8 @@ why is the page loading so slow?
 	{
 	  try
 	  {
+		console.log("get_delivery_date_text()");
+		
 		const response = await fetch(g_server_url,
 		{
 		  method: "POST",
@@ -789,6 +794,7 @@ why is the page loading so slow?
 		g_order.verification_code = document.getElementById('g_verification_code').value;
 		g_order.terms_accepted      = document.getElementById('g_terms_checkbox').checked;
 		g_order.sms_reminder_opt_in = document.getElementById('g_sms_reminder_checkbox').checked;
+		g_order.marketing_opt_in    = document.getElementById('g_marketing_opt_in_checkbox').checked;
 					
 		g_order.products = [];// Clear the array first to avoid duplicates if the button is clicked multiple times
 
@@ -1033,7 +1039,7 @@ why is the page loading so slow?
 
 			<div class="checkbox-group">
 				<input type="checkbox" id="g_marketing_opt_in_checkbox">
-				<label for="g_marketing_opt_in_checkbox">ברצוני לקבל מידע על מוצרים ומבצעים.</label>
+				<label for="g_marketing_opt_in_checkbox">ברצוני לקבל מידע על מוצרים חדשים ומבצעים.</label>
 			</div>
 
 			<!--
