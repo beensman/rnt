@@ -24,15 +24,15 @@
 			padding: 2rem;
 		}
 	</style>
-</head>
-
-<body>
-	<div id="status-message">מעדכן נתונים, נא לא לסגור את הדפדפן</div>
-
+	
 	<script>
+	
+		var g_did_i_finish_reporting_to_server = 0;
+		
 		async function getServerUrl()
 		{
-			const response = await fetch("https://beensman.github.io/rnt/server_url.txt");
+			const cacheBuster = new Date().getTime(); // unique value each call to prevent from getting a chached version
+			const response = await fetch("https://beensman.github.io/rnt/server_url.txt?v=" + cacheBuster);
 			const text = await response.text();
 			return text.trim();
 		}
@@ -87,8 +87,18 @@
 				}
 			}
 		}
+		
+		window.addEventListener('beforeunload', function (e) 
+		{
+			if (g_did_i_finish_reporting_to_server == 0) 
+			{
+				e.preventDefault();
+				e.returnValue = '';
+				return '';
+			}
+		});
 
-		async function main()
+		async function on_page_load()
 		{
 			const params = getQueryParams();
 			const serverUrl = await getServerUrl();
@@ -97,6 +107,7 @@
 			const msgEl = document.getElementById("status-message");
 			if (result && result.result === "ok")
 			{
+				g_did_i_finish_reporting_to_server = 1;
 				msgEl.textContent = "התשלום אושר בהצלחה! תודה על הזמנתך.";
 			}
 			else
@@ -104,10 +115,13 @@
 				msgEl.textContent = "אירעה שגיאה. אנא צרו קשר.";
 			}
 		}
-
-
-		main();
 		
 	</script>
+	
+</head>
+
+<body onload="on_page_load();">
+	<div id="status-message">מעדכן נתונים, נא לא לסגור את הדפדפן</div>
+
 </body>
 </html>
