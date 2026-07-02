@@ -169,6 +169,8 @@ function getQueryParams()
 					});
 					
 					const data = await response.json();
+					
+					console.log("RESULT: " + JSON.stringify(data));
 
 					if (data.result === "server_is_buisy")
 					{
@@ -180,6 +182,7 @@ function getQueryParams()
 				}
 				catch (err)
 				{
+					console.log("ERROR notifyServer: " + err);
 					await new Promise(resolve => setTimeout(resolve, 1500)); // sleep
 				}
 			}
@@ -216,6 +219,7 @@ function getQueryParams()
 			const params = getQueryParams();
 			if(params == "")
 			{
+				g_did_i_finish_reporting_to_server = 1;
 				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
 				return;
 			}
@@ -231,6 +235,7 @@ function getQueryParams()
 			
 			if(i == 10)
 			{
+				g_did_i_finish_reporting_to_server = 1;
 				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
 				return;
 			}
@@ -245,6 +250,7 @@ function getQueryParams()
 			}
 			else
 			{
+				g_did_i_finish_reporting_to_server = 1;
 				msgEl.textContent = "אירעה שגיאה. אנא צרו קשר.";
 			}
 		}
