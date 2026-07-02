@@ -164,14 +164,10 @@ function getQueryParams()
 					const response = await fetch(serverUrl,
 					{
 						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(
-						{
-							action: "max-hyp-success",
-							...params
-						})
+						headers: { "Content-Type": "text/plain;charset=utf-8" },
+						body: JSON.stringify({ action: "max-hyp-success", ...params })
 					});
-
+					
 					const data = await response.json();
 
 					if (data.result === "server_is_buisy")
