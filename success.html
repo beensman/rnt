@@ -58,7 +58,70 @@
 		}
 	}
 	
+function decodeWin1255Param(value)
+{
+    const bytes = [];
+    for (let i = 0; i < value.length; i++)
+    {
+        if (value[i] === '%' && i + 2 < value.length)
+        {
+            bytes.push(parseInt(value.substr(i + 1, 2), 16));
+            i += 2;
+        }
+        else
+        {
+            bytes.push(value.charCodeAt(i));
+        }
+    }
+    return new TextDecoder("windows-1255").decode(new Uint8Array(bytes));
+}
 
+
+function getQueryParams()
+{
+    try
+    {
+        console.log("getQueryParams()");
+
+        const params = {};
+        const searchString = window.location.search.substring(1);
+        if (!searchString) return params;
+
+        searchString.split("&").forEach(pair =>
+        {
+            const [key, rawValue] = pair.split("=");
+            if (key)
+            {
+                let decodedValue = "";
+                try
+                {
+                    decodedValue = decodeURIComponent(rawValue || "");
+                }
+                catch (e)
+                {
+                    console.log("WARN: decodeURIComponent failed for '" + key + "', trying windows-1255: " + e);
+                    try
+                    {
+                        decodedValue = decodeWin1255Param(rawValue || "");
+                    }
+                    catch (e2)
+                    {
+                        console.log("ERROR: windows-1255 fallback also failed for '" + key + "': " + e2);
+                        decodedValue = rawValue || ""; // last resort: keep raw
+                    }
+                }
+                params[decodeURIComponent(key)] = decodedValue;
+            }
+        });
+        return params;
+    }
+    catch(error)
+    {
+        console.log("ERROR: getQueryParams() failed: catch " + error);
+        return "";
+    }
+}	
+	/*
 	function getQueryParams()
 	{
 		try
@@ -84,7 +147,7 @@
 			console.log("ERROR: getQueryParams() failed: catch " + error);
 			return "";
 		}		
-	}
+	}*/
 
 
 	async function notifyServer(serverUrl, params)
@@ -93,7 +156,8 @@
 		{
 			console.log("notifyServer()");
 
-			for(let i=0; i<10;  i++)
+			let i=0;
+			for(i=0; i<10;  i++)
 			{
 				try
 				{
@@ -152,16 +216,18 @@
 		try
 		{
 			console.log("on_page_load()");
-			
+					
 			const params = getQueryParams();
 			if(params == "")
 			{
 				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
+				return;
 			}
 			
 			var serverUrl = getServerUrl();
 			
-			for(let i=0; i<10 && serverUrl == ""; i++)
+			let i = 0;			
+			for(i=0; i<10 && serverUrl == ""; i++)
 			{
 				serverUrl = getServerUrl();
 				await new Promise(resolve => setTimeout(resolve, 2000)); // sleep
@@ -170,6 +236,7 @@
 			if(i == 10)
 			{
 				alert("עקב בעיה טכנית לא ברור אם התשלום נקלט, אנא צור עימנו קשר דרך הצור קשר באתר");
+				return;
 			}
 			
 			const result = await notifyServer(serverUrl, params);
