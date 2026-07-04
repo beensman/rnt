@@ -1,3 +1,8 @@
+
+
+<!-- handle "server_under_maintenance" -->
+
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -57,71 +62,27 @@
 			return "";
 		}
 	}
+
 	
-function decodeWin1255Param(value)
-{
-    const bytes = [];
-    for (let i = 0; i < value.length; i++)
-    {
-        if (value[i] === '%' && i + 2 < value.length)
-        {
-            bytes.push(parseInt(value.substr(i + 1, 2), 16));
-            i += 2;
-        }
-        else
-        {
-            bytes.push(value.charCodeAt(i));
-        }
-    }
-    return new TextDecoder("windows-1255").decode(new Uint8Array(bytes));
-}
+	function decodeWin1255Param(value)
+	{
+		const bytes = [];
+		for (let i = 0; i < value.length; i++)
+		{
+			if (value[i] === '%' && i + 2 < value.length)
+			{
+				bytes.push(parseInt(value.substr(i + 1, 2), 16));
+				i += 2;
+			}
+			else
+			{
+				bytes.push(value.charCodeAt(i));
+			}
+		}
+		return new TextDecoder("windows-1255").decode(new Uint8Array(bytes));
+	}
 
 
-function getQueryParams()
-{
-    try
-    {
-        console.log("getQueryParams()");
-
-        const params = {};
-        const searchString = window.location.search.substring(1);
-        if (!searchString) return params;
-
-        searchString.split("&").forEach(pair =>
-        {
-            const [key, rawValue] = pair.split("=");
-            if (key)
-            {
-                let decodedValue = "";
-                try
-                {
-                    decodedValue = decodeURIComponent(rawValue || "");
-                }
-                catch (e)
-                {
-                    console.log("WARN: decodeURIComponent failed for '" + key + "', trying windows-1255: " + e);
-                    try
-                    {
-                        decodedValue = decodeWin1255Param(rawValue || "");
-                    }
-                    catch (e2)
-                    {
-                        console.log("ERROR: windows-1255 fallback also failed for '" + key + "': " + e2);
-                        decodedValue = rawValue || ""; // last resort: keep raw
-                    }
-                }
-                params[decodeURIComponent(key)] = decodedValue;
-            }
-        });
-        return params;
-    }
-    catch(error)
-    {
-        console.log("ERROR: getQueryParams() failed: catch " + error);
-        return "";
-    }
-}	
-	/*
 	function getQueryParams()
 	{
 		try
@@ -134,20 +95,38 @@ function getQueryParams()
 
 			searchString.split("&").forEach(pair =>
 			{
-				const [key, value] = pair.split("=");
+				const [key, rawValue] = pair.split("=");
 				if (key)
 				{
-					params[decodeURIComponent(key)] = decodeURIComponent(value || "");
+					let decodedValue = "";
+					try
+					{
+						decodedValue = decodeURIComponent(rawValue || "");
+					}
+					catch (e)
+					{
+						console.log("WARN: decodeURIComponent failed for '" + key + "', trying windows-1255: " + e);
+						try
+						{
+							decodedValue = decodeWin1255Param(rawValue || "");
+						}
+						catch (e2)
+						{
+							console.log("ERROR: windows-1255 fallback also failed for '" + key + "': " + e2);
+							decodedValue = rawValue || ""; // last resort: keep raw
+						}
+					}
+					params[decodeURIComponent(key)] = decodedValue;
 				}
 			});
-			return params;		
+			return params;
 		}
 		catch(error)
 		{
 			console.log("ERROR: getQueryParams() failed: catch " + error);
 			return "";
-		}		
-	}*/
+		}
+	}	
 
 
 	async function notifyServer(serverUrl, params)
