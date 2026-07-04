@@ -1,11 +1,13 @@
 <!--
 
+shop.html
 
 instructions for AI:
 before you write any code or do any other task, please go over my instructions and the code and ask me about anything that is missing or is not clear or my mistake or is ambigues etc...
 
 WHAT SHOULD YOU DO?
 nothing here
+
 
 give me the whole file with (only) the requested changes
 do only as i requested. nothing more. 
@@ -53,10 +55,7 @@ INFO:
 ---------------------
 MY TO DO:
 
-why is the page loading so slow? 
-- decrease images size, send requests to server in parallel!
-- send back only products that are in stock
-
+ handle "server_under_maintenance"
 
 
 -->
@@ -508,17 +507,13 @@ why is the page loading so slow?
 	async function show_pickup_points()
 	{
 		await get_pickup_points();
-		
-		document.getElementById('g_pickup_points_select').innerHTML = 
-			`<option value="not_selected">יש לבחור נקודת איסוף</option>` +
-			g_pickup_points_data_from_server.data
-			.filter(point => point.is_active === "1")
-			.map(point => {
-				return `
-				<option value="${point.pickup_point_code}"> 
-					${point.details_short}
-				</option>`;
+				
+		document.getElementById('g_pickup_points_select').innerHTML = `<option value="not_selected">יש לבחור נקודת איסוף</option>` + 
+			g_pickup_points_data_from_server.data.map(point => 
+			{
+				return ` <option value="${point.pickup_point_code}"> ${point.details_short} </option>`;
 			}).join('');
+
 	}
 
 		
@@ -535,12 +530,16 @@ why is the page loading so slow?
           // Use text/plain to avoid a complex CORS preflight OPTIONS request
           "Content-Type": "text/plain;charset=utf-8" 
 		  },
-		  body: JSON.stringify({ action: "get_table", table_name: "pickup_points" })
+		  body: JSON.stringify({ action: "get_pickup_points" })
 		});
 
 		g_pickup_points_data_from_server = await response.json();
 
 		//document.getElementById('g_customer_comments').value = JSON.stringify(g_pickup_points_data_from_server); // for debug
+
+		console.log("get_pickup_points() data from server:");
+		console.log(JSON.stringify(g_pickup_points_data_from_server));
+
 		
 		if (g_pickup_points_data_from_server.result != "ok") 
 		{
@@ -604,14 +603,14 @@ why is the page loading so slow?
           // Use text/plain to avoid a complex CORS preflight OPTIONS request
           "Content-Type": "text/plain;charset=utf-8" 
 		  },
-		  body: JSON.stringify({ action: "get_table", table_name: "products" })
+		  body: JSON.stringify({ action: "get_products" })
 		});
 
 		g_products_data_from_server = await response.json();
 
 		if (g_products_data_from_server.result != "ok") 
 		{
-		  console.log("get_products() failed.");
+		  console.log("ERROR: get_products() failed.");
 		  console.log(JSON.stringify(g_products_data_from_server));
 		}
 	  } 
