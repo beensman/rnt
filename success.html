@@ -64,6 +64,7 @@
 	}
 
 	
+	/* this function is not in use
 	function decodeWin1255Param(value)
 	{
 		const bytes = [];
@@ -80,56 +81,35 @@
 			}
 		}
 		return new TextDecoder("windows-1255").decode(new Uint8Array(bytes));
-	}
+	}*/
 
 
-	function getQueryParams()
+	function get_url_params() // returns every thing that is after the ? in the url as is (without encoding or anything. e.g: for http://www.site.com?field=ddd&field2=kkk will return  field=ddd&field2=kkk
 	{
-		try
+		try 
 		{
-			console.log("getQueryParams()");
-
-			const params = {};
-			const searchString = window.location.search.substring(1);
-			if (!searchString) return params;
-
-			searchString.split("&").forEach(pair =>
+			console.log("get_url_params()");
+			
+			// window.location.search returns the query string starting with '?'
+			// If there is no query string, it returns an empty string.
+			const search = window.location.search;
+			
+			if (search && search.length > 0) 
 			{
-				const [key, rawValue] = pair.split("=");
-				if (key)
-				{
-					let decodedValue = "";
-					try
-					{
-						decodedValue = decodeURIComponent(rawValue || "");
-					}
-					catch (e)
-					{
-						console.log("WARN: decodeURIComponent failed for '" + key + "', trying windows-1255: " + e);
-						try
-						{
-							decodedValue = decodeWin1255Param(rawValue || "");
-						}
-						catch (e2)
-						{
-							console.log("ERROR: windows-1255 fallback also failed for '" + key + "': " + e2);
-							decodedValue = rawValue || ""; // last resort: keep raw
-						}
-					}
-					params[decodeURIComponent(key)] = decodedValue;
-				}
-			});
-			return params;
-		}
-		catch(error)
+				// Return the string starting from the character after the '?'
+				return search.substring(1);
+			}
+			
+			return "";
+		} 
+		catch (error) 
 		{
-			console.log("ERROR: getQueryParams() failed: catch " + error);
+			console.error("ERROR: get_url_params() failed: " + error);
 			return "";
 		}
-	}	
+	}
 
-
-	async function notifyServer(serverUrl, params)
+	async function notifyServer(serverUrl, order_id_in, base64_encoded_paramd)
 	{
 		try
 		{
@@ -144,12 +124,12 @@
 					{
 						method: "POST",
 						headers: { "Content-Type": "text/plain;charset=utf-8" },
-						body: JSON.stringify({ action: "max-hyp-success", ...params })
+						body: JSON.stringify({ action: "max-hyp-success", order_id: order_id_in, url_params: base64_encoded_paramd })
 					});
 					
 					const data = await response.json();
 					
-					console.log("RESULT: " + JSON.stringify(data));
+					console.log("notifyServer() RESULT: " + JSON.stringify(data));
 
 					if (data.result === "server_is_buisy")
 					{
@@ -189,13 +169,25 @@
 	});
 
 
+	function getRawValue(key, str) 
+	{
+		// Regex explanation:
+		// (?<=^|&) : Lookbehind to ensure the key starts at the beginning or after an &
+		// key=      : Match the specific key followed by =
+		// ([^&]*)  : Capture everything that is NOT an & (the raw value)
+		const regex = new RegExp(`(?<=${key}=)([^&]*)`);
+		const match = str.match(regex);
+		
+		return match ? match[0] : "";
+	}
+
 	async function on_page_load()
 	{
 		try
 		{
 			console.log("on_page_load()");
 					
-			const params = getQueryParams();
+			const params = get_url_params();
 			if(params == "")
 			{
 				g_did_i_finish_reporting_to_server = 1;
@@ -219,7 +211,19 @@
 				return;
 			}
 			
-			const result = await notifyServer(serverUrl, params);
+			// encode the params to Base64
+
+			// Encode to UTF-8 bytes to handle special caracters that might crash the base64 encoder
+			//const bytes = new TextEncoder().encode(params);
+
+			// Convert bytes to a Base64 string
+			//const base64_encoded_paramd = btoa(String.fromCharCode(...bytes));
+			const base64_encoded_paramd = btoa(String.fromCharCode(...params));
+			
+			// get the order id
+			const order_id = getRawValue('Order', params);
+
+			const result = await notifyServer(serverUrl, order_id, base64_encoded_paramd);
 
 			const msgEl = document.getElementById("status-message");
 			if (result && result.result === "ok")
