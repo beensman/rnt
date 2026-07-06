@@ -180,6 +180,51 @@
 		
 		return match ? match[0] : "";
 	}
+	
+	
+	function encode_url(input_original_url)
+	{
+		// A full lookup table for indices 0x80 to 0xFF
+		const win1255Table = [
+			'\u20AC', '\uFFFD', '\u201A', '\u0192', '\u201E', '\u2026', '\u2020', '\u2021',
+			'\u02C6', '\u2030', '\uFFFD', '\u2039', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD',
+			'\uFFFD', '\u2018', '\u2019', '\u201C', '\u201D', '\u2022', '\u2013', '\u2014',
+			'\u02DC', '\u2122', '\uFFFD', '\u203A', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD',
+			'\u00A0', '\u00A1', '\u00A2', '\u00A3', '\u20AA', '\u00A5', '\u00A6', '\u00A7',
+			'\u00A8', '\u00A9', '\u00D7', '\u00AB', '\u00AC', '\u00AD', '\u00AE', '\u00AF',
+			'\u00B0', '\u00B1', '\u00B2', '\u00B3', '\u00B4', '\u00B5', '\u00B6', '\u00B7',
+			'\u00B8', '\u00B9', '\u00F7', '\u00BB', '\u00BC', '\u00BD', '\u00BE', '\u00BF',
+			'\u05B0', '\u05B1', '\u05B2', '\u05B3', '\u05B4', '\u05B5', '\u05B6', '\u05B7',
+			'\u05B8', '\u05B9', '\uFFFD', '\u05BB', '\u05BC', '\u05BD', '\u05BE', '\u05BF',
+			'\u05C0', '\u05C1', '\u05C2', '\u05C3', '\u05F4', '\u05F3', '\uFFFD', '\uFFFD',
+			'\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD', '\uFFFD',
+			'\u05D0', '\u05D1', '\u05D2', '\u05D3', '\u05D4', '\u05D5', '\u05D6', '\u05D7',
+			'\u05D8', '\u05D9', '\u05DA', '\u05DB', '\u05DC', '\u05DD', '\u05DE', '\u05DF',
+			'\u05E0', '\u05E1', '\u05E2', '\u05E3', '\u05E4', '\u05E5', '\u05E6', '\u05E7',
+			'\u05E8', '\u05E9', '\u05EA', '\uFFFD', '\uFFFD', '\u200E', '\u200F', '\uFFFD'
+		];
+
+		const bytes = [];
+		for (let i = 0; i < input_original_url.length; i++) 
+		{
+			let code = input_original_url.charCodeAt(i);
+			// If it's standard ASCII, push as is
+			if (code < 128) 
+			{
+				bytes.push(code);
+			} 
+			else 
+			{
+				// Find index in our custom table
+				let index = win1255Table.indexOf(input_original_url[i]);
+				bytes.push(index !== -1 ? index + 128 : 63); // 63 is '?'
+			}
+		}
+		const base64 = btoa(String.fromCharCode(...bytes));
+		
+		return base64;
+	}	
+
 
 	async function on_page_load()
 	{
@@ -211,19 +256,12 @@
 				return;
 			}
 			
-			// encode the params to Base64
-
-			// Encode to UTF-8 bytes to handle special caracters that might crash the base64 encoder
-			//const bytes = new TextEncoder().encode(params);
-
-			// Convert bytes to a Base64 string
-			//const base64_encoded_paramd = btoa(String.fromCharCode(...bytes));
-			const base64_encoded_paramd = btoa(String.fromCharCode(...params));
+			const encoded_url_params = encode_url(params);
 			
 			// get the order id
 			const order_id = getRawValue('Order', params);
 
-			const result = await notifyServer(serverUrl, order_id, base64_encoded_paramd);
+			const result = await notifyServer(serverUrl, order_id, encoded_url_params);
 
 			const msgEl = document.getElementById("status-message");
 			if (result && result.result === "ok")
